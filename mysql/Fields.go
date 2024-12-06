@@ -98,7 +98,7 @@ func (F Field) AsDate(d string) time.Time {
 			out, _ := time.Parse("2006-01-02 15:04:05", d)
 			return out
 		} else {
-			return time.Now()
+			return time.Time{}
 		}
 	}
 
