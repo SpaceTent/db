@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type InsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string] struct {
+type InsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool] struct {
 	Id      int        `db:"column=id primarykey=yes table=Users"`
 	Name    string     `db:"column=name"`
 	Dtadded time.Time  `db:"column=dtadded omit=yes"`
@@ -20,7 +20,7 @@ type InsertPersonTime struct {
 	Dtadded time.Time `db:"column=dtadded"`
 }
 
-func generateInsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string](value StatusType) InsertPerson[StatusType] {
+func generateInsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool](value StatusType) InsertPerson[StatusType] {
 	return InsertPerson[StatusType]{
 		0, "Test", time.Now(), value,
 	}
@@ -30,7 +30,7 @@ func generateInsertPersonTime(id int) InsertPersonTime {
 	return InsertPersonTime{id, "Test", time.Date(2024, time.December, 7, 15, 29, 25, 10, time.UTC)}
 }
 
-func generateArrayInsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string](value StatusType) []InsertPerson[StatusType] {
+func generateArrayInsertPerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool](value StatusType) []InsertPerson[StatusType] {
 	return []InsertPerson[StatusType]{
 		{0, "Test", time.Now(), value},
 		{1, "Test", time.Now(), value},
@@ -58,6 +58,11 @@ func testInsertStringErrorValueHelper(t *testing.T, sql string, err error) {
 	assert.Equal(t, `INSERT INTO Users(name,status) VALUES (X'54657374',X'31');`, sql)
 }
 
+func testInsertBoolErrorValueHelper(t *testing.T, sql string, err error) {
+	assert.NoError(t, err)
+	assert.Equal(t, "INSERT INTO Users(name,status) VALUES (X'54657374',true);", sql)
+}
+
 func testInsertTimeErrorValueHelper(t *testing.T, sql string, err error) {
 	assert.NoError(t, err)
 	assert.Equal(t, `INSERT INTO Users(name,dtadded) VALUES (X'54657374','2024-12-07 15:29:25');`, sql)
@@ -79,6 +84,15 @@ func testInsertManyStringErrorValueHelper(t *testing.T, sql string, err error) {
 (X'54657374',X'31')
 (X'54657374',X'31')
 (X'54657374',X'31');`, sql)
+}
+
+func testInsertManyBoolErrorValueHelper(t *testing.T, sql string, err error) {
+	assert.NoError(t, err)
+	assert.Equal(t, `INSERT INTO Users(name,status) VALUES (X'54657374',true)
+(X'54657374',true)
+(X'54657374',true)
+(X'54657374',true)
+(X'54657374',true);`, sql)
 }
 
 func testInsertManyTimeErrorValueHelper(t *testing.T, sql string, err error) {
@@ -116,6 +130,8 @@ func TestInsert(t *testing.T) {
 	testInsertNumericalErrorValueHelper(t, sql, err)
 	sql, err = DB.Insert(generateInsertPerson(float64(1)))
 	testInsertNumericalErrorValueHelper(t, sql, err)
+	sql, err = DB.Insert(generateInsertPerson(true))
+	testInsertBoolErrorValueHelper(t, sql, err)
 
 	sql, err = DB.Insert(generateInsertPerson("1"))
 	testInsertStringErrorValueHelper(t, sql, err)
@@ -151,6 +167,8 @@ func TestInsertMany(t *testing.T) {
 	testInsertManyNumericalErrorValueHelper(t, sql, err)
 	sql, err = InsertMany[InsertPerson[float64]](generateArrayInsertPerson(float64(1)))
 	testInsertManyNumericalErrorValueHelper(t, sql, err)
+	sql, err = InsertMany[InsertPerson[bool]](generateArrayInsertPerson(true))
+	testInsertManyBoolErrorValueHelper(t, sql, err)
 
 	sql, err = InsertMany[InsertPerson[string]](generateArrayInsertPerson("1"))
 	testInsertManyStringErrorValueHelper(t, sql, err)

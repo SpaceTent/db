@@ -111,6 +111,8 @@ func generateValuesSql(dbStructure any, t reflect.Type) (string, error) {
 					sb.WriteString(hexRepresentation(value.(string)) + ",")
 				case "float32", "float64":
 					sb.WriteString(fmt.Sprintf("%v,", value))
+				case "bool":
+					sb.WriteString(fmt.Sprintf("%v,", value))
 				case "Time":
 					sb.WriteString(fmt.Sprintf("'%s',", value.(time.Time).Format("2006-01-02 15:04:05")))
 				default:
