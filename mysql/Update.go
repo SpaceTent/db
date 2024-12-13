@@ -32,9 +32,12 @@ func (db *Database) Update(dbStructure any) (string, error) {
 
 			if dbStructureMap["primarykey"] == "yes" {
 				// l.INFO("Primary Key Found: %s", dbStructureMap["table"])
-				UpdateTable = dbStructureMap["table"]
 				UpdateColumn = dbStructureMap["column"]
 				UpdateValue = fmt.Sprintf("%v", value)
+			}
+
+			if dbStructureMap["table"] != "" {
+				UpdateTable = dbStructureMap["table"]
 			}
 
 			if dbStructureMap["omit"] != "yes" && dbStructureMap["primarykey"] != "yes" {
@@ -64,6 +67,10 @@ func (db *Database) Update(dbStructure any) (string, error) {
 
 	if buildsql == "" {
 		return "", fmt.Errorf("no non-primary key and non-omitted fields found in structure")
+	}
+
+	if UpdateColumn == "" {
+		return "", fmt.Errorf("no primary key set, unable to set a where clause")
 	}
 
 	buildsql = strings.TrimSuffix(buildsql, ",")

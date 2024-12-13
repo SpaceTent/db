@@ -75,7 +75,7 @@ func generateBuildSql(dbStructure any, t reflect.Type) (table string, buildSql s
 				return "", "", errors.New("no column name specified for field " + field.Name)
 			}
 
-			if dbStructureMap["primarykey"] == "yes" {
+			if dbStructureMap["table"] != "" {
 				table = dbStructureMap["table"]
 			}
 
