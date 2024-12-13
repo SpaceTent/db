@@ -1,6 +1,9 @@
 package mysql
 
-import "fmt"
+import (
+	"fmt"
+	l "log/slog"
+)
 
 func (db *Database) Query(sql string, parameters ...any) ([]Record, error) {
 
@@ -10,7 +13,7 @@ func (db *Database) Query(sql string, parameters ...any) ([]Record, error) {
 	if err != nil {
 		return allRecords, err
 	}
-	fmt.Printf("sql: %s params: %+v\n", sql, parameters)
+
 	rows, err := DatabaseConnection.Query(sql, parameters...)
 
 	if err != nil {
@@ -18,18 +21,21 @@ func (db *Database) Query(sql string, parameters ...any) ([]Record, error) {
 	}
 	defer rows.Close()
 
-	columns, _ := rows.Columns()
+	columns, err := rows.Columns()
+	if err != nil {
+		l.Error(fmt.Sprintf("Error while fetching column names, err: %s\n", err.Error()))
+	}
 	count := len(columns)
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
 
 	for rows.Next() {
-		fmt.Println("PONG")
+
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
 		if err := rows.Scan(valuePtrs...); err != nil {
-			fmt.Printf("ERROR: %s\n", err.Error())
+			l.Error(fmt.Sprintf("Error while scanning in query: %s\n", err.Error()))
 		}
 
 		out := Record{}

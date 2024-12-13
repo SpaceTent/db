@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 )
 
@@ -19,7 +18,6 @@ func (db *Database) Save(dbStructure any, primaryKeyValue any) (lastInsertedID, 
 		if err != nil {
 			return 0, 0, err
 		}
-		fmt.Printf("insert sql: %s\n", sql)
 	} else {
 		sql, err = DB.Update(dbStructure)
 		if err != nil {

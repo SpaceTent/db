@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"fmt"
 	"reflect"
 
 	l "log/slog"
@@ -16,8 +15,6 @@ func QueryStruct[T any](sql string, parameters ...any) ([]T, error) {
 	if err != nil {
 		return make([]T, 0), err
 	}
-
-	fmt.Printf("Records: %+v\n", allRecords)
 
 	results := make([]T, 0)
 
