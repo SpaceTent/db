@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type UpdatePerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string] struct {
+type UpdatePerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool] struct {
 	Id      int        `db:"column=id primarykey=yes table=Users"`
 	Name    string     `db:"column=name"`
 	Dtadded time.Time  `db:"column=dtadded omit=yes"`
@@ -20,7 +20,7 @@ type UpdatePersonTime struct {
 	Dtadded time.Time `db:"column=dtadded"`
 }
 
-func generateUpdatePerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string](value StatusType) UpdatePerson[StatusType] {
+func generateUpdatePerson[StatusType uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64 | float32 | float64 | string | bool](value StatusType) UpdatePerson[StatusType] {
 	return UpdatePerson[StatusType]{
 		0, "Test", time.Now(), value,
 	}
@@ -35,6 +35,11 @@ func generateUpdatePersonTime(id int) UpdatePersonTime {
 func testUpdateNumericalErrorValueHelper(t *testing.T, sql string, err error) {
 	assert.NoError(t, err)
 	assert.Equal(t, "UPDATE Users SET name=X'54657374',status=1 WHERE id=0;", sql)
+}
+
+func testUpdateBoolErrorValueHelper(t *testing.T, sql string, err error) {
+	assert.NoError(t, err)
+	assert.Equal(t, "UPDATE Users SET name=X'54657374',status=true WHERE id=0;", sql)
 }
 
 func testUpdateStringErrorValueHelper(t *testing.T, sql string, err error) {
@@ -74,6 +79,8 @@ func TestUpdate(t *testing.T) {
 	testUpdateNumericalErrorValueHelper(t, sql, err)
 	sql, err = DB.Update(generateUpdatePerson(float64(1)))
 	testUpdateNumericalErrorValueHelper(t, sql, err)
+	sql, err = DB.Update(generateUpdatePerson(true))
+	testUpdateBoolErrorValueHelper(t, sql, err)
 
 	sql, err = DB.Update(generateUpdatePerson("1"))
 	testUpdateStringErrorValueHelper(t, sql, err)

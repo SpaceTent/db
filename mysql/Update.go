@@ -32,9 +32,12 @@ func (db *Database) Update(dbStructure any) (string, error) {
 
 			if dbStructureMap["primarykey"] == "yes" {
 				// l.INFO("Primary Key Found: %s", dbStructureMap["table"])
-				UpdateTable = dbStructureMap["table"]
 				UpdateColumn = dbStructureMap["column"]
 				UpdateValue = fmt.Sprintf("%v", value)
+			}
+
+			if dbStructureMap["table"] != "" {
+				UpdateTable = dbStructureMap["table"]
 			}
 
 			if dbStructureMap["omit"] != "yes" && dbStructureMap["primarykey"] != "yes" {
@@ -46,6 +49,8 @@ func (db *Database) Update(dbStructure any) (string, error) {
 				case "string":
 					buildsql = buildsql + hexRepresentation(value.(string)) + ","
 				case "float32", "float64":
+					buildsql = buildsql + fmt.Sprintf("%v", value) + ","
+				case "bool":
 					buildsql = buildsql + fmt.Sprintf("%v", value) + ","
 				case "Time":
 					buildsql = buildsql + fmt.Sprintf("'%s'", value.(time.Time).Format("2006-01-02 15:04:05")) + ","
@@ -64,6 +69,10 @@ func (db *Database) Update(dbStructure any) (string, error) {
 
 	if buildsql == "" {
 		return "", fmt.Errorf("no non-primary key and non-omitted fields found in structure")
+	}
+
+	if UpdateColumn == "" {
+		return "", fmt.Errorf("no primary key set, unable to set a where clause")
 	}
 
 	buildsql = strings.TrimSuffix(buildsql, ",")

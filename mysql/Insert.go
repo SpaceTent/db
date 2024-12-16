@@ -75,7 +75,7 @@ func generateBuildSql(dbStructure any, t reflect.Type) (table string, buildSql s
 				return "", "", errors.New("no column name specified for field " + field.Name)
 			}
 
-			if dbStructureMap["primarykey"] == "yes" {
+			if dbStructureMap["table"] != "" {
 				table = dbStructureMap["table"]
 			}
 
@@ -110,6 +110,8 @@ func generateValuesSql(dbStructure any, t reflect.Type) (string, error) {
 				case "string":
 					sb.WriteString(hexRepresentation(value.(string)) + ",")
 				case "float32", "float64":
+					sb.WriteString(fmt.Sprintf("%v,", value))
+				case "bool":
 					sb.WriteString(fmt.Sprintf("%v,", value))
 				case "Time":
 					sb.WriteString(fmt.Sprintf("'%s',", value.(time.Time).Format("2006-01-02 15:04:05")))
