@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -41,6 +42,16 @@ func (F Field) AsString() string {
 	}
 
 	return F.Value.(string)
+}
+
+func (F Field) AsStringPtr() *string {
+
+	if F.Value == nil {
+		return nil
+	}
+
+	value := F.AsString()
+	return &value
 }
 
 func (F Field) AsFloat() float64 {
@@ -88,6 +99,16 @@ func (F Field) AsFloat() float64 {
 	return float64(F.Value.(float64))
 }
 
+func (F Field) AsFloatPtr() *float64 {
+
+	if F.Value == nil {
+		return nil
+	}
+
+	value := F.AsFloat()
+	return &value
+}
+
 func (F Field) AsDate(d string) time.Time {
 
 	// https://github.com/go-sql-driver/mysql#timetime-support
@@ -113,6 +134,14 @@ func (F Field) AsDate(d string) time.Time {
 		return F.Value.(time.Time)
 	}
 
+}
+
+func (F Field) AsDatePtr(d string) *time.Time {
+	if F.Value == nil {
+		return nil
+	}
+	value := F.AsDate(d)
+	return &value
 }
 
 func (F Field) AsDateEpoch() int64 {
@@ -218,6 +247,14 @@ func (F Field) AsInt64() int64 {
 	return 0
 }
 
+func (F Field) AsInt64Ptr() *int64 {
+	if F.Value == nil {
+		return nil
+	}
+	value := F.AsInt64()
+	return &value
+}
+
 func (F Field) AsUInt64() uint64 {
 	if F.Value == nil {
 		return 0
@@ -268,6 +305,14 @@ func (F Field) AsUInt64() uint64 {
 	return 0
 }
 
+func (F Field) AsUInt64Ptr() *uint64 {
+	if F.Value == nil {
+		return nil
+	}
+	value := F.AsUInt64()
+	return &value
+}
+
 func (F Field) AsBool() bool {
 	if F.Value == nil {
 		return false
@@ -309,6 +354,14 @@ func (F Field) AsBool() bool {
 	return false
 }
 
+func (F Field) AsBoolPtr() *bool {
+	if F.Value == nil {
+		return nil
+	}
+	value := F.AsBool()
+	return &value
+}
+
 func (F Field) AsByte() []byte {
 
 	if F.Value == nil {
@@ -342,4 +395,28 @@ func convToBool[T uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 |
 	default:
 		return false
 	}
+}
+
+func toIntPtr[T int | int8 | int16 | int32 | int64](val *int64) reflect.Value {
+	if val == nil {
+		return reflect.ValueOf((*T)(nil))
+	}
+	tmpValue := T(*val)
+	return reflect.ValueOf(&tmpValue)
+}
+
+func toUIntPtr[T uint | uint8 | uint16 | uint32 | uint64](val *uint64) reflect.Value {
+	if val == nil {
+		return reflect.ValueOf((*T)(nil))
+	}
+	tmpValue := T(*val)
+	return reflect.ValueOf(&tmpValue)
+}
+
+func toFloatPtr[T float32 | float64](val *float64) reflect.Value {
+	if val == nil {
+		return reflect.ValueOf((*T)(nil))
+	}
+	tmpValue := T(*val)
+	return reflect.ValueOf(&tmpValue)
 }
