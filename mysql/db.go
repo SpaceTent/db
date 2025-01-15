@@ -68,6 +68,8 @@ func getStructDetails[T any](dbFieldName string) (string, any) {
 		if dbStructureMap["column"] == dbFieldName {
 			if field.Type == reflect.TypeOf([]uint8{}) {
 				return field.Name, "[]uint8"
+			} else if field.Type.Kind() == reflect.Pointer {
+				return field.Name, "*" + field.Type.Elem().Name()
 			} else {
 				return field.Name, field.Type.Name()
 			}

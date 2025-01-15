@@ -20,7 +20,6 @@ type IntegrationTestingSaveTestCase[T comparable] struct {
 	sqlColumnType string
 }
 
-// setUpIntegrationTest sets up the SQL Lite connection
 func setUpSaveIntegrationTestConnection(t *testing.T) string {
 	tempFile, err := os.CreateTemp("", "integration-test-*.db")
 	assert.NoError(t, err)
